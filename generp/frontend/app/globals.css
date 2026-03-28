@@ -24,7 +24,27 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /* Sidebar */
     --sidebar: 0 0% 98%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-accent: 210 40% 94%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-width: 240px;
+    --sidebar-collapsed-width: 56px;
+
+    /* Module accent colors */
+    --finance: 160 84% 39%;       /* emerald */
+    --finance-light: 152 81% 96%;
+    --crm: 217 91% 60%;            /* blue */
+    --crm-light: 214 100% 97%;
+    --hr: 270 91% 65%;             /* violet */
+    --hr-light: 270 100% 97%;
+    --supply: 25 95% 53%;          /* orange */
+    --supply-light: 34 100% 96%;
+    --projects: 189 94% 43%;       /* cyan */
+    --projects-light: 183 100% 96%;
   }
 
   .dark {
@@ -32,7 +52,7 @@
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 222.2 47.4% 8%;
     --popover-foreground: 210 40% 98%;
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -47,7 +67,25 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* Sidebar dark */
     --sidebar: 222.2 47.4% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+
+    /* Module accent colors dark */
+    --finance: 160 84% 39%;
+    --finance-light: 160 30% 15%;
+    --crm: 217 91% 60%;
+    --crm-light: 217 30% 15%;
+    --hr: 270 91% 65%;
+    --hr-light: 270 30% 15%;
+    --supply: 25 95% 53%;
+    --supply-light: 25 30% 15%;
+    --projects: 189 94% 43%;
+    --projects-light: 189 30% 15%;
   }
 }
 
@@ -56,6 +94,78 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  /* Fade in */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Slide in from left */
+  .animate-slide-in-left {
+    animation: slideInLeft 0.25s ease-out;
+  }
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Slide in from right */
+  .animate-slide-in-right {
+    animation: slideInRight 0.25s ease-out;
+  }
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Slide in from top */
+  .animate-slide-in-down {
+    animation: slideInDown 0.2s ease-out;
+  }
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Smooth scroll */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 2px;
   }
 }

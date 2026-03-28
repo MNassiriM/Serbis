@@ -5,6 +5,15 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ChatMessage, ERPModule, ModuleUIConfig, SSEActionEvent } from "@/types/erp";
+function uuidv4(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Auth store
@@ -129,4 +138,114 @@ export const useERPStore = create<ERPState>()((set, get) => ({
     const module = get().modules.find((m) => m.name === name);
     return module?.ui_config as ModuleUIConfig | undefined;
   },
+}));
+
+// ---------------------------------------------------------------------------
+// UI Store
+// ---------------------------------------------------------------------------
+
+interface UIState {
+  sidebarOpen: boolean;
+  sidebarCollapsed: boolean;
+  theme: "light" | "dark" | "system";
+  commandPaletteOpen: boolean;
+  toggleSidebar: () => void;
+  setSidebarOpen: (open: boolean) => void;
+  setSidebarCollapsed: (v: boolean) => void;
+  setTheme: (theme: "light" | "dark" | "system") => void;
+  setCommandPaletteOpen: (open: boolean) => void;
+}
+
+export const useUIStore = create<UIState>()(
+  persist(
+    (set) => ({
+      sidebarOpen: true,
+      sidebarCollapsed: false,
+      theme: "system",
+      commandPaletteOpen: false,
+
+      toggleSidebar: () =>
+        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+
+      setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
+      setSidebarCollapsed: (v) => set({ sidebarCollapsed: v }),
+
+      setTheme: (theme) => set({ theme }),
+
+      setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+    }),
+    {
+      name: "generp-ui",
+      partialize: (state) => ({
+        sidebarCollapsed: state.sidebarCollapsed,
+        theme: state.theme,
+      }),
+    }
+  )
+);
+
+// ---------------------------------------------------------------------------
+// Notification Store
+// ---------------------------------------------------------------------------
+
+export interface AppNotification {
+  id: string;
+  type: "info" | "success" | "warning" | "error";
+  title: string;
+  body?: string;
+  read: boolean;
+  createdAt: Date;
+  entity?: string;
+  recordId?: string;
+  action?: string;
+}
+
+interface NotificationState {
+  notifications: AppNotification[];
+  unreadCount: number;
+  addNotification: (
+    n: Omit<AppNotification, "id" | "createdAt" | "read">
+  ) => void;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  clearNotifications: () => void;
+}
+
+export const useNotificationStore = create<NotificationState>()((set) => ({
+  notifications: [],
+  unreadCount: 0,
+
+  addNotification: (n) =>
+    set((state) => {
+      const notification: AppNotification = {
+        ...n,
+        id: uuidv4(),
+        read: false,
+        createdAt: new Date(),
+      };
+      return {
+        notifications: [notification, ...state.notifications],
+        unreadCount: state.unreadCount + 1,
+      };
+    }),
+
+  markAsRead: (id) =>
+    set((state) => {
+      const notifications = state.notifications.map((n) =>
+        n.id === id ? { ...n, read: true } : n
+      );
+      return {
+        notifications,
+        unreadCount: notifications.filter((n) => !n.read).length,
+      };
+    }),
+
+  markAllAsRead: () =>
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true })),
+      unreadCount: 0,
+    })),
+
+  clearNotifications: () => set({ notifications: [], unreadCount: 0 }),
 }));

@@ -1,4 +1,6 @@
-import { ERPNavigation } from "@/components/erp/ERPNavigation";
+import { AppShell } from "@/components/layout/AppShell";
+import { TopBar } from "@/components/layout/TopBar";
+import { Sidebar } from "@/components/layout/Sidebar";
 
 export default function DashboardLayout({
   children,
@@ -6,14 +8,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-60 shrink-0">
-        <ERPNavigation />
-      </aside>
+    <AppShell>
+      <div className="h-screen flex flex-col overflow-hidden">
+        {/* TopBar */}
+        <TopBar />
 
-      {/* Main content */}
-      <main className="flex-1 overflow-hidden">{children}</main>
-    </div>
+        {/* Body */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <Sidebar />
+
+          {/* Main content */}
+          <main className="flex-1 overflow-auto bg-background">
+            {children}
+          </main>
+        </div>
+      </div>
+    </AppShell>
   );
 }

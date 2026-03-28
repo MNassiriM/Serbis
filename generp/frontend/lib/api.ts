@@ -10,7 +10,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 // Base fetch utility
 // ---------------------------------------------------------------------------
 
-async function apiFetch<T>(
+export async function apiFetch<T>(
   path: string,
   options: RequestInit & { token?: string } = {}
 ): Promise<T> {
@@ -182,5 +182,129 @@ export function createDataApi(tenantId: string, token: string) {
         method: "DELETE",
         token,
       }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Finance API
+// ---------------------------------------------------------------------------
+
+function makeListCreate<T>(base: string, path: string, token: string) {
+  return {
+    list: (params?: Record<string, string>) => {
+      const qs = params ? `?${new URLSearchParams(params)}` : "";
+      return apiFetch<T[]>(`${base}${path}${qs}`, { token });
+    },
+    create: (data: unknown) =>
+      apiFetch<T>(`${base}${path}`, {
+        method: "POST",
+        body: JSON.stringify(data),
+        token,
+      }),
+    get: (id: string) => apiFetch<T>(`${base}${path}/${id}`, { token }),
+    update: (id: string, data: unknown) =>
+      apiFetch<T>(`${base}${path}/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        token,
+      }),
+  };
+}
+
+export function createFinanceApi(token: string) {
+  const base = "/api/v1/finance";
+  return {
+    invoices: {
+      ...makeListCreate(base, "/invoices", token),
+      send: (id: string) =>
+        apiFetch<unknown>(`${base}/invoices/${id}/send`, {
+          method: "POST",
+          token,
+        }),
+      markPaid: (id: string) =>
+        apiFetch<unknown>(`${base}/invoices/${id}/mark-paid`, {
+          method: "POST",
+          token,
+        }),
+    },
+    quotes: {
+      ...makeListCreate(base, "/quotes", token),
+      accept: (id: string) =>
+        apiFetch<unknown>(`${base}/quotes/${id}/accept`, {
+          method: "POST",
+          token,
+        }),
+    },
+    payments: makeListCreate(base, "/payments", token),
+    expenses: makeListCreate(base, "/expenses", token),
+    dashboard: () => apiFetch<unknown>("/api/v1/finance/dashboard", { token }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// CRM API
+// ---------------------------------------------------------------------------
+
+export function createCrmApi(token: string) {
+  const base = "/api/v1/crm";
+  return {
+    companies: makeListCreate(base, "/companies", token),
+    contacts: makeListCreate(base, "/contacts", token),
+    deals: {
+      ...makeListCreate(base, "/deals", token),
+      moveStage: (id: string, stage: string) =>
+        apiFetch<unknown>(`${base}/deals/${id}/move`, {
+          method: "POST",
+          body: JSON.stringify({ stage }),
+          token,
+        }),
+    },
+    activities: makeListCreate(base, "/activities", token),
+    pipeline: () => apiFetch<unknown>("/api/v1/crm/pipeline", { token }),
+    dashboard: () => apiFetch<unknown>("/api/v1/crm/dashboard", { token }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// HR API
+// ---------------------------------------------------------------------------
+
+export function createHrApi(token: string) {
+  const base = "/api/v1/hr";
+  return {
+    employees: makeListCreate(base, "/employees", token),
+    recruitment: makeListCreate(base, "/recruitment", token),
+    leaves: makeListCreate(base, "/leaves", token),
+    evaluations: makeListCreate(base, "/evaluations", token),
+    dashboard: () => apiFetch<unknown>("/api/v1/hr/dashboard", { token }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Supply Chain API
+// ---------------------------------------------------------------------------
+
+export function createSupplyApi(token: string) {
+  const base = "/api/v1/supply";
+  return {
+    products: makeListCreate(base, "/products", token),
+    stock: makeListCreate(base, "/stock", token),
+    suppliers: makeListCreate(base, "/suppliers", token),
+    orders: makeListCreate(base, "/orders", token),
+    dashboard: () => apiFetch<unknown>("/api/v1/supply/dashboard", { token }),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Projects API
+// ---------------------------------------------------------------------------
+
+export function createProjectsApi(token: string) {
+  const base = "/api/v1/projects";
+  return {
+    projects: makeListCreate(base, "", token),
+    tasks: makeListCreate(base, "/tasks", token),
+    timeline: () => apiFetch<unknown>("/api/v1/projects/timeline", { token }),
+    dashboard: () => apiFetch<unknown>("/api/v1/projects/dashboard", { token }),
   };
 }
