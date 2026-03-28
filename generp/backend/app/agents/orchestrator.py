@@ -17,6 +17,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from pydantic import BaseModel
 
+from app.agents.query_agent import QueryAgent
 from app.agents.schema_agent import SchemaAgent
 from app.agents.ui_agent import UIAgent
 from app.core.config import get_settings
@@ -84,6 +85,7 @@ Intentions possibles :
 - GENERAL_QUESTION : question générale sur la plateforme ou l'ERP
 - CONFIRM_SCHEMA : l'utilisateur confirme le schéma proposé ("oui", "c'est parfait", "ok")
 - REJECT_SCHEMA : l'utilisateur rejette ou veut modifier le schéma ("non", "modifier", "changer")
+- QUERY_DATA : l'utilisateur demande des données ou un rapport (ex: "montre-moi les factures en retard", "liste des clients", "combien de deals ouverts ?")
 
 Réponds UNIQUEMENT avec le JSON, sans texte supplémentaire."""
 
