@@ -11,8 +11,7 @@ from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from app.core.dependencies import DBSession, get_current_tenant
-from app.models.tenant import Tenant
+from app.core.dependencies import CurrentTenant, DBSession
 from app.models.workflow import WorkflowTrigger
 from app.services.workflow_service import WorkflowService
 
@@ -43,7 +42,7 @@ class WorkflowTestRequest(BaseModel):
     record_data: dict[str, Any]
 
 
-def _serialize_workflow(wf: Any) -> dict[str, Any]:
+def _serialize(wf: Any) -> dict[str, Any]:
     return {
         "id": str(wf.id),
         "tenant_id": str(wf.tenant_id),
@@ -60,19 +59,19 @@ def _serialize_workflow(wf: Any) -> dict[str, Any]:
 
 @router.get("")
 async def list_workflows(
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> list[dict[str, Any]]:
     svc = WorkflowService(db)
     workflows = await svc.list_for_tenant(tenant_id=current_tenant.id)
-    return [_serialize_workflow(wf) for wf in workflows]
+    return [_serialize(wf) for wf in workflows]
 
 
 @router.post("", status_code=201)
 async def create_workflow(
     payload: WorkflowCreate,
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> dict[str, Any]:
     svc = WorkflowService(db)
     wf = await svc.create(
@@ -83,14 +82,14 @@ async def create_workflow(
         actions=payload.actions,
         description=payload.description,
     )
-    return _serialize_workflow(wf)
+    return _serialize(wf)
 
 
 @router.get("/{workflow_id}")
 async def get_workflow(
     workflow_id: str,
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> dict[str, Any]:
     svc = WorkflowService(db)
     try:
@@ -100,15 +99,15 @@ async def get_workflow(
     wf = await svc.get(workflow_id=wid, tenant_id=current_tenant.id)
     if wf is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
-    return _serialize_workflow(wf)
+    return _serialize(wf)
 
 
 @router.put("/{workflow_id}")
 async def update_workflow(
     workflow_id: str,
     payload: WorkflowUpdate,
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> dict[str, Any]:
     svc = WorkflowService(db)
     try:
@@ -123,14 +122,14 @@ async def update_workflow(
         )
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
-    return _serialize_workflow(wf)
+    return _serialize(wf)
 
 
 @router.delete("/{workflow_id}")
 async def delete_workflow(
     workflow_id: str,
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> dict[str, bool]:
     svc = WorkflowService(db)
     try:
@@ -147,8 +146,8 @@ async def delete_workflow(
 async def test_workflow(
     workflow_id: str,
     payload: WorkflowTestRequest,
-    db: DBSession = DBSession,
-    current_tenant: Tenant = Depends(get_current_tenant),
+    current_tenant: CurrentTenant,
+    db: DBSession,
 ) -> dict[str, Any]:
     """Simulate a workflow trigger and return which actions would fire."""
     svc = WorkflowService(db)
@@ -161,7 +160,6 @@ async def test_workflow(
     if wf is None:
         raise HTTPException(status_code=404, detail="Workflow not found")
 
-    # Evaluate conditions against provided record_data
     conditions_pass = WorkflowService._evaluate_conditions(
         wf.conditions, payload.record_data, payload.entity
     )
