@@ -34,6 +34,7 @@ class Intent(str, Enum):
     GENERAL_QUESTION = "GENERAL_QUESTION"
     CONFIRM_SCHEMA = "CONFIRM_SCHEMA"
     REJECT_SCHEMA = "REJECT_SCHEMA"
+    QUERY_DATA = "QUERY_DATA"  # "montre-moi les factures en retard"
 
 
 class OrchestratorState(BaseModel):
