@@ -1,0 +1,106 @@
+apisix:
+  node_listen: 9080
+  enable_ipv6: false
+  enable_admin: true
+  admin_listen:
+    ip: 0.0.0.0
+    port: 9180
+  admin_api_version: v3
+
+deployment:
+  role: traditional
+  role_traditional:
+    config_provider: etcd
+  etcd:
+    hosts:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    timeout: 30
+
+admin_key:
+  - name: "admin"
+    key: edd1c9f034335f136f87ad84b625c8f1
+    role: admin
+  - name: "viewer"
+    key: 4054f7cf07e344346cd3f287985e76a2
+    role: viewer
+
+plugin_attr:
+  prometheus:
+    export_uri: /apisix/prometheus/metrics
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
+
+plugins:
+  - real-ip
+  - client-control
+  - proxy-control
+  - request-id
+  - zipkin
+  - ext-plugin-pre-req
+  - fault-injection
+  - mocking
+  - serverless-pre-function
+  - cors
+  - ip-restriction
+  - ua-restriction
+  - referer-restriction
+  - csrf
+  - uri-blocker
+  - request-validation
+  - openid-connect
+  - authz-casbin
+  - authz-casdoor
+  - wolf-rbac
+  - ldap-auth
+  - hmac-auth
+  - basic-auth
+  - jwt-auth
+  - key-auth
+  - consumer-restriction
+  - forward-auth
+  - opa
+  - authz-keycloak
+  - proxy-mirror
+  - proxy-cache
+  - proxy-rewrite
+  - api-breaker
+  - limit-conn
+  - limit-count
+  - limit-req
+  - gzip
+  - server-info
+  - traffic-split
+  - redirect
+  - response-rewrite
+  - kafka-proxy
+  - grpc-transcode
+  - grpc-web
+  - public-api
+  - prometheus
+  - datadog
+  - echo
+  - http-logger
+  - skywalking-logger
+  - google-cloud-logging
+  - splunk-hec-logging
+  - file-logger
+  - loggly
+  - elasticsearch-logger
+  - tencent-cloud-cls
+  - sls-logger
+  - tcp-logger
+  - udp-logger
+  - rocketmq-logger
+  - kafka-logger
+  - syslog
+  - log-rotate
+  - example-plugin
+  - aws-lambda
+  - azure-functions
+  - openwhisk
+  - openfunction
+  - serverless-post-function
+  - ext-plugin-post-req
+  - ext-plugin-post-resp

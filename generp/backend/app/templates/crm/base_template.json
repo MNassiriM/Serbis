@@ -1,0 +1,93 @@
+{
+  "module": "crm",
+  "version": "1.0",
+  "description": "Template CRM de base — Leads, Opportunités, Contacts, Activités, Pipeline",
+  "entities": [
+    {
+      "name": "contact",
+      "display_name": "Contacts",
+      "description": "Personnes physiques (prospects ou clients)",
+      "category": "crm",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "prenom", "display_name": "Prénom", "type": "varchar(100)", "required": true, "unique": false, "default": null, "description": "Prénom"},
+        {"name": "nom", "display_name": "Nom", "type": "varchar(100)", "required": true, "unique": false, "default": null, "description": "Nom de famille"},
+        {"name": "email", "display_name": "Email", "type": "varchar(255)", "required": false, "unique": true, "default": null, "description": "Adresse email"},
+        {"name": "telephone", "display_name": "Téléphone", "type": "varchar(20)", "required": false, "unique": false, "default": null, "description": "Numéro de téléphone"},
+        {"name": "poste", "display_name": "Poste", "type": "varchar(150)", "required": false, "unique": false, "default": null, "description": "Fonction / intitulé de poste"},
+        {"name": "entreprise", "display_name": "Entreprise", "type": "varchar(255)", "required": false, "unique": false, "default": null, "description": "Nom de l'entreprise"},
+        {"name": "source", "display_name": "Source", "type": "varchar(100)", "required": false, "unique": false, "default": null, "description": "Canal d'acquisition : LinkedIn, site web, salon, etc."},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [],
+      "indexes": ["email", "entreprise"],
+      "default_sort": "nom"
+    },
+    {
+      "name": "lead",
+      "display_name": "Leads",
+      "description": "Prospects non qualifiés entrant dans le pipeline",
+      "category": "crm",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "nom", "display_name": "Nom", "type": "varchar(255)", "required": true, "unique": false, "default": null, "description": "Nom du lead ou de l'entreprise"},
+        {"name": "email", "display_name": "Email", "type": "varchar(255)", "required": false, "unique": false, "default": null, "description": "Email de contact"},
+        {"name": "telephone", "display_name": "Téléphone", "type": "varchar(20)", "required": false, "unique": false, "default": null, "description": "Téléphone de contact"},
+        {"name": "source", "display_name": "Source", "type": "varchar(100)", "required": false, "unique": false, "default": null, "description": "Canal d'acquisition"},
+        {"name": "statut", "display_name": "Statut", "type": "varchar(50)", "required": false, "unique": false, "default": "'nouveau'", "description": "Statut : nouveau, contacté, qualifié, perdu"},
+        {"name": "score", "display_name": "Score", "type": "integer", "required": false, "unique": false, "default": "0", "description": "Score de qualification (0-100)"},
+        {"name": "notes", "display_name": "Notes", "type": "text", "required": false, "unique": false, "default": null, "description": "Notes de qualification"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [],
+      "indexes": ["statut", "source", "score"],
+      "default_sort": "created_at"
+    },
+    {
+      "name": "opportunite",
+      "display_name": "Opportunités",
+      "description": "Opportunités commerciales en cours de négociation",
+      "category": "crm",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "lead_id", "display_name": "Lead", "type": "uuid", "required": false, "unique": false, "default": null, "description": "Lead source de l'opportunité"},
+        {"name": "titre", "display_name": "Titre", "type": "varchar(255)", "required": true, "unique": false, "default": null, "description": "Titre de l'opportunité"},
+        {"name": "montant_estime", "display_name": "Montant estimé", "type": "decimal(10,2)", "required": false, "unique": false, "default": null, "description": "Valeur estimée du contrat"},
+        {"name": "probabilite", "display_name": "Probabilité (%)", "type": "integer", "required": false, "unique": false, "default": "50", "description": "Probabilité de conclure (0-100)"},
+        {"name": "etape", "display_name": "Étape", "type": "varchar(100)", "required": false, "unique": false, "default": "'prospection'", "description": "Étape du pipeline : prospection, qualification, proposition, négociation, gagné, perdu"},
+        {"name": "date_closing_estimee", "display_name": "Date de closing estimée", "type": "date", "required": false, "unique": false, "default": null, "description": "Date cible de conclusion"},
+        {"name": "description", "display_name": "Description", "type": "text", "required": false, "unique": false, "default": null, "description": "Détails de l'opportunité"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [
+        {"name": "lead", "type": "many_to_one", "target_entity": "lead", "foreign_key": "lead_id", "description": "Opportunité issue d'un lead"}
+      ],
+      "indexes": ["lead_id", "etape", "date_closing_estimee"],
+      "default_sort": "date_closing_estimee"
+    },
+    {
+      "name": "activite",
+      "display_name": "Activités",
+      "description": "Appels, emails, réunions liés aux opportunités",
+      "category": "crm",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "opportunite_id", "display_name": "Opportunité", "type": "uuid", "required": true, "unique": false, "default": null, "description": "Opportunité associée"},
+        {"name": "type", "display_name": "Type", "type": "varchar(50)", "required": true, "unique": false, "default": "'appel'", "description": "Type : appel, email, réunion, démo, autre"},
+        {"name": "date", "display_name": "Date", "type": "timestamp", "required": true, "unique": false, "default": null, "description": "Date et heure de l'activité"},
+        {"name": "description", "display_name": "Description", "type": "text", "required": false, "unique": false, "default": null, "description": "Résumé de l'activité"},
+        {"name": "resultat", "display_name": "Résultat", "type": "text", "required": false, "unique": false, "default": null, "description": "Résultat ou suite à donner"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [
+        {"name": "opportunite", "type": "many_to_one", "target_entity": "opportunite", "foreign_key": "opportunite_id", "description": "Activité liée à une opportunité"}
+      ],
+      "indexes": ["opportunite_id", "type", "date"],
+      "default_sort": "date"
+    }
+  ]
+}

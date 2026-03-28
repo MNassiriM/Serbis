@@ -1,0 +1,73 @@
+{
+  "module": "finance",
+  "version": "1.0",
+  "description": "Template Finance de base — Clients, Factures, Paiements",
+  "entities": [
+    {
+      "name": "client",
+      "display_name": "Clients",
+      "description": "Clients et partenaires commerciaux",
+      "category": "finance",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "nom", "display_name": "Nom", "type": "varchar(255)", "required": true, "unique": false, "default": null, "description": "Raison sociale ou nom complet"},
+        {"name": "email", "display_name": "Email", "type": "varchar(255)", "required": false, "unique": true, "default": null, "description": "Adresse email principale"},
+        {"name": "telephone", "display_name": "Téléphone", "type": "varchar(20)", "required": false, "unique": false, "default": null, "description": "Numéro de téléphone"},
+        {"name": "adresse", "display_name": "Adresse", "type": "text", "required": false, "unique": false, "default": null, "description": "Adresse postale complète"},
+        {"name": "siret", "display_name": "SIRET", "type": "varchar(14)", "required": false, "unique": false, "default": null, "description": "Numéro SIRET (14 chiffres)"},
+        {"name": "statut", "display_name": "Statut", "type": "varchar(50)", "required": false, "unique": false, "default": "'actif'", "description": "Statut du client : actif, inactif, prospect"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [],
+      "indexes": ["email", "siret", "statut"],
+      "default_sort": "nom"
+    },
+    {
+      "name": "facture",
+      "display_name": "Factures",
+      "description": "Factures émises aux clients",
+      "category": "finance",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "client_id", "display_name": "Client", "type": "uuid", "required": true, "unique": false, "default": null, "description": "Référence au client"},
+        {"name": "numero", "display_name": "Numéro", "type": "varchar(50)", "required": true, "unique": true, "default": null, "description": "Numéro de facture unique (ex: FAC-2024-001)"},
+        {"name": "date_emission", "display_name": "Date d'émission", "type": "date", "required": true, "unique": false, "default": null, "description": "Date d'émission de la facture"},
+        {"name": "date_echeance", "display_name": "Date d'échéance", "type": "date", "required": false, "unique": false, "default": null, "description": "Date limite de paiement"},
+        {"name": "montant_ht", "display_name": "Montant HT", "type": "decimal(10,2)", "required": true, "unique": false, "default": null, "description": "Montant hors taxes"},
+        {"name": "taux_tva", "display_name": "Taux TVA (%)", "type": "decimal(5,2)", "required": false, "unique": false, "default": "20.00", "description": "Taux de TVA applicable"},
+        {"name": "montant_ttc", "display_name": "Montant TTC", "type": "decimal(10,2)", "required": false, "unique": false, "default": null, "description": "Montant toutes taxes comprises"},
+        {"name": "statut", "display_name": "Statut", "type": "varchar(50)", "required": false, "unique": false, "default": "'brouillon'", "description": "Statut : brouillon, envoyée, payée, en_retard, annulée"},
+        {"name": "notes", "display_name": "Notes", "type": "text", "required": false, "unique": false, "default": null, "description": "Notes internes ou commentaires"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [
+        {"name": "client", "type": "many_to_one", "target_entity": "client", "foreign_key": "client_id", "description": "Facture appartient à un client"}
+      ],
+      "indexes": ["client_id", "numero", "statut", "date_echeance"],
+      "default_sort": "date_emission"
+    },
+    {
+      "name": "paiement",
+      "display_name": "Paiements",
+      "description": "Paiements reçus pour les factures",
+      "category": "finance",
+      "fields": [
+        {"name": "id", "display_name": "Identifiant", "type": "uuid", "required": true, "unique": true, "default": "gen_random_uuid()", "description": "Identifiant unique"},
+        {"name": "facture_id", "display_name": "Facture", "type": "uuid", "required": true, "unique": false, "default": null, "description": "Référence à la facture"},
+        {"name": "date_paiement", "display_name": "Date de paiement", "type": "date", "required": true, "unique": false, "default": null, "description": "Date du paiement"},
+        {"name": "montant", "display_name": "Montant", "type": "decimal(10,2)", "required": true, "unique": false, "default": null, "description": "Montant du paiement"},
+        {"name": "mode_paiement", "display_name": "Mode de paiement", "type": "varchar(50)", "required": false, "unique": false, "default": "'virement'", "description": "Mode : virement, chèque, carte, espèces"},
+        {"name": "reference", "display_name": "Référence", "type": "varchar(100)", "required": false, "unique": false, "default": null, "description": "Référence bancaire ou numéro de transaction"},
+        {"name": "created_at", "display_name": "Créé le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de création"},
+        {"name": "updated_at", "display_name": "Modifié le", "type": "timestamp", "required": true, "unique": false, "default": "now()", "description": "Date de dernière modification"}
+      ],
+      "relations": [
+        {"name": "facture", "type": "many_to_one", "target_entity": "facture", "foreign_key": "facture_id", "description": "Paiement associé à une facture"}
+      ],
+      "indexes": ["facture_id", "date_paiement"],
+      "default_sort": "date_paiement"
+    }
+  ]
+}
