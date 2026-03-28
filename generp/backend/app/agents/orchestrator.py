@@ -67,6 +67,7 @@ _llm = ChatAnthropic(
 
 _schema_agent = SchemaAgent(llm=_llm)
 _ui_agent = UIAgent(llm=_llm)
+_query_agent = QueryAgent(llm=_llm)
 
 # ---------------------------------------------------------------------------
 # Intent classifier node
@@ -204,13 +205,15 @@ async def error_handler_node(state: OrchestratorState) -> OrchestratorState:
 def route_after_classifier(
     state: OrchestratorState,
 ) -> Literal[
-    "schema_agent", "clarification", "confirm_schema", "reject_schema", "error_handler"
+    "schema_agent", "query_agent", "clarification", "confirm_schema", "reject_schema", "error_handler"
 ]:
     """Decide which node to call next based on the classified intent."""
     intent = state.intent
 
     if intent in (Intent.DESCRIBE_BUSINESS, Intent.ADD_MODULE):
         return "schema_agent"
+    elif intent == Intent.QUERY_DATA:
+        return "query_agent"
     elif intent == Intent.CONFIRM_SCHEMA:
         return "confirm_schema"
     elif intent == Intent.REJECT_SCHEMA:
@@ -234,6 +237,7 @@ def build_graph() -> StateGraph:
     # Nodes
     builder.add_node("intent_classifier", intent_classifier_node)
     builder.add_node("schema_agent", _schema_agent.run)
+    builder.add_node("query_agent", _query_agent.run)
     builder.add_node("clarification", clarification_node)
     builder.add_node("confirm_schema", confirm_schema_node)
     builder.add_node("reject_schema", reject_schema_node)
@@ -246,6 +250,7 @@ def build_graph() -> StateGraph:
     # All terminal nodes → END
     for terminal in [
         "schema_agent",
+        "query_agent",
         "clarification",
         "confirm_schema",
         "reject_schema",
